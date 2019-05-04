@@ -9,12 +9,19 @@ LABEL maintainer="homerr"
 
 # set python to use utf-8 rather than ascii
 ENV PYTHONIOENCODING="UTF-8"
-
+ENV GLIBC_VERSION 2.29-r0
 RUN \
 echo "**** install packages ****" && \
  apk add --no-cache --upgrade && \
  apk add --no-cache \
 	nodejs && \
+ curl -Lo /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
+ curl -Lo glibc.apk "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk" && \
+ curl -Lo glibc-bin.apk "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-bin-${GLIBC_VERSION}.apk" && \
+ apk add glibc-bin.apk glibc.apk && \
+ /usr/glibc-compat/sbin/ldconfig /lib /usr/glibc-compat/lib && \
+ echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf && \
+ rm -rf glibc.apk glibc-bin.apk /var/cache/apk/* && \
 echo "**** fetch sickchill ****" && \
 mkdir -p \
 	/app/sickchill && \
